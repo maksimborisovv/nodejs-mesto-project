@@ -2,6 +2,7 @@ import express, { NextFunction, urlencoded, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import usersRouter from './routes/users';
 import cardsRouter from './routes/cards';
+import doesNotExistsRouter from './routes/does-not-exists';
 import { errors } from 'celebrate';
 
 const { PORT = 3000 } = process.env;
@@ -23,6 +24,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
+app.use(doesNotExistsRouter);
 
 app.use(errors());
 
