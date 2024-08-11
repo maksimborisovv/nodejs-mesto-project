@@ -1,30 +1,35 @@
 import express, { NextFunction, urlencoded, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import authRouter from './routes/auth';
 import usersRouter from './routes/users';
 import cardsRouter from './routes/cards';
+import auth from './middlewares/auth';
 import doesNotExistsRouter from './routes/does-not-exists';
 import { errors } from 'celebrate';
+import { requestLogger, errorLogger } from './middlewares/logger';
+
+require('dotenv').config();
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
 
-app.use(express.json());
-app.use(urlencoded({extended: true}));
-
-app.use((req: Request, res: Response, next: NextFunction) => {
-  req.user = {
-    _id: '66b77ebda740d39171199e9a' // '66b5ee44ea2b98aa4ec90e53'
-  }
-  next();
-});
-
 mongoose.set('strictQuery', true);
 mongoose.connect('mongodb://localhost:27017/mestodb');
+
+app.use(express.json());
+app.use(urlencoded({extended: true}));
+app.use(requestLogger);
+
+app.use('/', authRouter);
+
+app.use(auth);
 
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 app.use(doesNotExistsRouter);
+
+app.use(errorLogger);
 
 app.use(errors());
 

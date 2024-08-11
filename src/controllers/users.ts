@@ -1,14 +1,35 @@
 import { NextFunction, Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import User from '../models/user';
+
+require('dotenv').config();
+
+const { JWT_SECRET = 'some-secret-key' } = process.env;
 
 const NotFoundError = require('../errors/not-found-error');
 const BadRequestError = require('../errors/bad-request');
+const ConfictError = require('../errors/conflict');
 
-export const createUser = (req: Request, res: Response, next: NextFunction) => User.create({
-  name: req.body.name,
-  about: req.body.about,
-  avatar: req.body.avatar,
-})
+export const createUser = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => User.findOne({ email: req.body.email })
+  .then((user) => {
+    if (user) {
+      throw new ConfictError('Пользователь с таким email уже существует');
+    }
+
+    return bcrypt.hash(req.body.password, 10);
+  })
+  .then((hash) => User.create({
+    name: req.body.name,
+    about: req.body.about,
+    avatar: req.body.avatar,
+    email: req.body.email,
+    password: hash,
+  }))
   .then((user) => res.status(201).send({
     _id: user._id,
     name: user.name,
@@ -18,6 +39,8 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => U
   .catch((err) => {
     if (err.name === 'ValidationError' || err.name === 'CastError') {
       next(new BadRequestError('Данные не прошли валидацию'));
+    } else if (err.code === 11000) {
+      throw new ConfictError('Пользователь с таким email уже существует');
     } else {
       next(err);
     }
@@ -105,3 +128,15 @@ export const updateUserAvatar = (
       next(err);
     }
   });
+
+export const login = (req: Request, res: Response, next: NextFunction) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+
+      res.send({ token });
+    })
+    .catch(next);
+};

@@ -3,6 +3,7 @@ import Card from '../models/card';
 
 const NotFoundError = require('../errors/not-found-error');
 const BadRequestError = require('../errors/bad-request');
+const ForbiddenError = require('../errors/forbidden');
 
 export const createCard = (req: Request, res: Response, next: NextFunction) => Card.create({
   name: req.body.name,
@@ -33,6 +34,9 @@ export const deleteCardById = (req: Request, res: Response, next: NextFunction) 
   .then((c) => {
     if (!c) {
       throw new NotFoundError('Карточка с таким id не существует');
+    }
+    if (c.owner !== req.user?._id) {
+      throw new ForbiddenError('Недостаточно прав для удаления этой карточки');
     }
 
     Card.findByIdAndDelete(req.params.cardId)
