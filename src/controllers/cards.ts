@@ -29,7 +29,7 @@ export const deleteCardById = (req: Request, res: Response, next: NextFunction) 
     if (!c) {
       throw new NotFoundError('Карточка с таким id не существует');
     }
-    if (String(c.owner) !== req.user?._id) {
+    if (String(c.owner) !== req.user?._id._id) {
       throw new ForbiddenError('Недостаточно прав для удаления этой карточки');
     }
 

@@ -33,7 +33,7 @@ export const createUser = (
     if (err.name === 'ValidationError' || err.name === 'CastError') {
       next(new BadRequestError('Данные не прошли валидацию'));
     } else if (err.code === 11000) {
-      throw new ConfictError('Пользователь с таким email уже существует');
+      next(new ConfictError('Пользователь с таким email уже существует'));
     } else {
       next(err);
     }
@@ -59,7 +59,7 @@ export const getUsers = (req: Request, res: Response, next: NextFunction) => Use
 export const getUserByTokenId = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => User.findById({ _id: req.user?._id._id })
   .then((user) => {
     if (!user) {
@@ -79,7 +79,7 @@ export const getUserByTokenId = (
     } else {
       next(err);
     }
-  })
+  });
 
 export const getUserById = (req: Request, res: Response, next: NextFunction) => (
   User.findById({ _id: req.params.userId })

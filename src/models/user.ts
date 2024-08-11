@@ -2,7 +2,6 @@ import mongoose, { Schema, model } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 
-const NotFoundError = require('../errors/not-found-error');
 const UnauthorizedError = require('../errors/unauthorized');
 
 interface IUser {

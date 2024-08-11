@@ -1,4 +1,6 @@
-import { NextFunction, Request, Response, Router } from 'express';
+import {
+  NextFunction, Request, Response, Router,
+} from 'express';
 
 const NotFoundError = require('../errors/not-found-error');
 
