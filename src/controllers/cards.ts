@@ -11,7 +11,7 @@ export const createCard = (req: Request, res: Response, next: NextFunction) => C
 })
   .then((card) => res.status(201).send(card))
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
       next(new BadRequestError('Данные не прошли валидацию'));
     } else {
       next(err);
@@ -21,7 +21,7 @@ export const createCard = (req: Request, res: Response, next: NextFunction) => C
 export const getCards = (_req: Request, res: Response, next: NextFunction) => Card.find()
   .then((cards) => res.send(cards))
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
       next(new BadRequestError('Данные не прошли валидацию'));
     } else {
       next(err);
@@ -39,7 +39,7 @@ export const deleteCardById = (req: Request, res: Response, next: NextFunction) 
       .then((card) => res.send(card));
   })
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
       next(new BadRequestError('Данные не прошли валидацию'));
     } else {
       next(err);
@@ -61,7 +61,7 @@ export const putLike = (req: Request, res: Response, next: NextFunction) => Card
       .then((card) => res.send(card));
   })
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
       next(new BadRequestError('Данные не прошли валидацию'));
     } else {
       next(err);
@@ -83,7 +83,7 @@ export const deleteLike = (req: Request, res: Response, next: NextFunction) => (
         .then((card) => res.send(card));
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadRequestError('Данные не прошли валидацию'));
       } else {
         next(err);

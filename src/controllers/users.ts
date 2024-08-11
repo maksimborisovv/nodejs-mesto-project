@@ -16,7 +16,7 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => U
     avatar: user.avatar,
   }))
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
       next(new BadRequestError('Данные не прошли валидацию'));
     } else {
       next(err);
@@ -32,7 +32,13 @@ export const getUsers = (req: Request, res: Response, next: NextFunction) => Use
       avatar: user.avatar,
     })),
   ))
-  .catch(next);
+  .catch((err) => {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
+      next(new BadRequestError('Данные не прошли валидацию'));
+    } else {
+      next(err);
+    }
+  });
 
 export const getUserById = (req: Request, res: Response, next: NextFunction) => (
   User.findById({ _id: req.params.userId })
@@ -48,7 +54,13 @@ export const getUserById = (req: Request, res: Response, next: NextFunction) => 
         avatar: user.avatar,
       });
     })
-    .catch(next)
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new BadRequestError('Данные не прошли валидацию'));
+      } else {
+        next(err);
+      }
+    })
 );
 
 export const updateUser = (req: Request, res: Response, next: NextFunction) => (
@@ -61,10 +73,15 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => (
       return User.findByIdAndUpdate(req.user?._id, {
         name: req.body.name,
         about: req.body.about,
-        avatar: req.body.avatar,
-      }).then((user) => res.send(user));
+      }, { new: true, runValidators: true }).then((user) => res.send(user));
     })
-    .catch(next)
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new BadRequestError('Данные не прошли валидацию'));
+      } else {
+        next(err);
+      }
+    })
 );
 
 export const updateUserAvatar = (
@@ -79,6 +96,12 @@ export const updateUserAvatar = (
 
     return User.findByIdAndUpdate(req.user?._id, {
       avatar: req.body.avatar,
-    }).then((user) => res.send(user));
+    }, { new: true, runValidators: true }).then((user) => res.send(user));
   })
-  .catch(next);
+  .catch((err) => {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
+      next(new BadRequestError('Данные не прошли валидацию'));
+    } else {
+      next(err);
+    }
+  });
