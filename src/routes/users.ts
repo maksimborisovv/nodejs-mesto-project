@@ -1,14 +1,19 @@
 import { Router } from 'express';
 import { celebrate, Joi } from 'celebrate';
 import {
-  getUserById, getUsers, updateUser, updateUserAvatar,
+  getUserById, getUserByTokenId, getUsers, updateUser, updateUserAvatar,
 } from '../controllers/users';
 import { urlRegex } from '../models/user';
 
 const router = Router();
 
 router.get('/', getUsers);
-router.get('/:userId', getUserById);
+router.get('/me', getUserByTokenId);
+router.get('/:userId', celebrate({
+  params: Joi.object().keys({
+    userId: Joi.string().length(24).hex().required()
+  })
+}), getUserById);
 router.patch('/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),

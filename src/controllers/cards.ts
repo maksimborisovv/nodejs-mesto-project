@@ -21,13 +21,7 @@ export const createCard = (req: Request, res: Response, next: NextFunction) => C
 
 export const getCards = (_req: Request, res: Response, next: NextFunction) => Card.find()
   .then((cards) => res.send(cards))
-  .catch((err) => {
-    if (err.name === 'ValidationError' || err.name === 'CastError') {
-      next(new BadRequestError('Данные не прошли валидацию'));
-    } else {
-      next(err);
-    }
-  });
+  .catch(next);
 
 export const deleteCardById = (req: Request, res: Response, next: NextFunction) => Card
   .findById(req.params.cardId)
@@ -35,7 +29,7 @@ export const deleteCardById = (req: Request, res: Response, next: NextFunction) 
     if (!c) {
       throw new NotFoundError('Карточка с таким id не существует');
     }
-    if (c.owner !== req.user?._id) {
+    if (String(c.owner) !== req.user?._id) {
       throw new ForbiddenError('Недостаточно прав для удаления этой карточки');
     }
 

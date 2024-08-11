@@ -15,14 +15,7 @@ export const createUser = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => User.findOne({ email: req.body.email })
-  .then((user) => {
-    if (user) {
-      throw new ConfictError('Пользователь с таким email уже существует');
-    }
-
-    return bcrypt.hash(req.body.password, 10);
-  })
+) => bcrypt.hash(req.body.password, 10)
   .then((hash) => User.create({
     name: req.body.name,
     about: req.body.about,
@@ -62,6 +55,31 @@ export const getUsers = (req: Request, res: Response, next: NextFunction) => Use
       next(err);
     }
   });
+
+export const getUserByTokenId = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => User.findById({ _id: req.user?._id._id })
+  .then((user) => {
+    if (!user) {
+      throw new NotFoundError('Пользователь с таким id не существует');
+    }
+
+    res.send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+    });
+  })
+  .catch((err) => {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
+      next(new BadRequestError('Данные не прошли валидацию'));
+    } else {
+      next(err);
+    }
+  })
 
 export const getUserById = (req: Request, res: Response, next: NextFunction) => (
   User.findById({ _id: req.params.userId })

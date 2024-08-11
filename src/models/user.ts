@@ -60,7 +60,7 @@ userSchema.static('findUserByCredentials', function findUserByCredentials(email:
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь с таким id не существует');
+        throw new UnauthorizedError('Неверный логин или пароль');
       }
 
       return bcrypt.compare(password, user.password)
